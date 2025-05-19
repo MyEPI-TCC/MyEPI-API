@@ -1,19 +1,17 @@
+// src/routes/movimentacaoRouter.js
 import express from 'express';
-import * as EstoqueLoteController from '../controllers/EstoqueLoteController.js';
+import MovimentacaoController from '../controllers/MovimentacaoController.js';
 
 const router = express.Router();
 
-// Rotas para estoque em lotes
-router.get('/', EstoqueLoteController.getAllEstoqueLotes);
-router.get('/:id', EstoqueLoteController.getEstoqueLoteById);
-router.post('/', EstoqueLoteController.createEstoqueLote);
-router.put('/:id', EstoqueLoteController.updateEstoqueLote);
-router.delete('/:id', EstoqueLoteController.deleteEstoqueLote);
+// Rotas para movimentações
+router.get('/', MovimentacaoController.listarMovimentacoes);
+router.get('/:id', MovimentacaoController.buscarMovimentacao);
+router.post('/', MovimentacaoController.registrarMovimentacao);
 
-// Rotas específicas
-router.get('/remessa/:id', EstoqueLoteController.getEstoqueLotesByRemessa);
-router.get('/modelo-epi/:id', EstoqueLoteController.getEstoqueLotesByModeloEpi);
-router.get('/proximos-vencimento', EstoqueLoteController.getEstoqueLotesProximosVencimento);
-router.get('/baixo-estoque', EstoqueLoteController.getEstoqueLotesBaixoEstoque);
+// Rotas específicas - estas devem vir antes da rota com :id
+router.get('/funcionario/:id_funcionario', MovimentacaoController.listarPorFuncionario);
+router.get('/epi/:id_epi', MovimentacaoController.listarPorEpi);
+router.get('/tipo/:tipo', MovimentacaoController.listarPorTipo);
 
 export default router;

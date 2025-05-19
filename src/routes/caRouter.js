@@ -1,20 +1,20 @@
 
 import express from 'express';
-import * as CAController from '../controllers/CAController.js';
+import CaController from '../controllers/CaController.js';
 
 const router = express.Router();
 
 // Rotas para Certificados de Aprovação (CA)
-router.get('/', CAController.getAllCAs);
-router.get('/:id', CAController.getCAById);
-router.post('/', CAController.createCA);
-router.put('/:id', CAController.updateCA);
-router.delete('/:id', CAController.deleteCA);
+router.get('/', CaController.listarCas);
+router.post('/', CaController.criarCa);
+// router.get('/:id', CaController.getCAById);
+// router.put('/:id', CaController.updateCA);
+// router.delete('/:id', CaController.deleteCA);
 
-// Rotas específicas
-router.get('/numero/:numero', CAController.getCAByNumero);
-router.get('/modelo-epi/:id', CAController.getCAsByModeloEpi);
-router.get('/ativos', CAController.getCAsAtivos);
-router.get('/proximos-vencimento', CAController.getCAsProximosVencimento);
+// // Rotas específicas
+// router.get('/numero/:numero', CaController.getCAByNumero);
+// router.get('/modelo-epi/:id', CaController.getCAsByModeloEpi);
+// router.get('/ativos', CaController.getCAsAtivos);
+// router.get('/proximos-vencimento', CaController.getCAsProximosVencimento);
 
 export default router;

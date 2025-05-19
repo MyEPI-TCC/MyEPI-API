@@ -1,17 +1,18 @@
+// src/routes/funcionarioRouter.js
 import express from 'express';
-import * as FornecedorController from '../controllers/FornecedorController.js';
+import FuncionarioController from '../controllers/FuncionarioController.js';
 
 const router = express.Router();
 
-// Rotas para fornecedores
-router.get('/', FornecedorController.getAllFornecedores);
-router.get('/:id', FornecedorController.getFornecedorById);
-router.post('/', FornecedorController.createFornecedor);
-router.put('/:id', FornecedorController.updateFornecedor);
-router.delete('/:id', FornecedorController.deleteFornecedor);
+// Rotas para funcionários
+router.get('/', FuncionarioController.listarFuncionarios);
+router.get('/:id', FuncionarioController.buscarFuncionario);
+router.post('/', FuncionarioController.criarFuncionario);
+router.put('/:id', FuncionarioController.atualizarFuncionario);
+router.delete('/:id', FuncionarioController.excluirFuncionario);
 
 // Rotas específicas
-router.get('/search', FornecedorController.searchFornecedores);
-router.get('/:id/remessas', FornecedorController.getRemessasByFornecedor);
+// Colocamos antes da rota /:id para evitar conflitos
+router.get('/cargo/:id_cargo', FuncionarioController.listarPorCargo);
 
 export default router;

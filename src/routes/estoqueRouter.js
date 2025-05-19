@@ -1,19 +1,19 @@
 import express from 'express';
-import * as EstoqueLoteController from '../controllers/EstoqueLoteController.js';
+import EstoqueLoteController from '../controllers/EstoqueLoteController.js';
 
 const router = express.Router();
 
-// Rotas para estoque em lotes
-router.get('/', EstoqueLoteController.getAllEstoqueLotes);
-router.get('/:id', EstoqueLoteController.getEstoqueLoteById);
-router.post('/', EstoqueLoteController.createEstoqueLote);
-router.put('/:id', EstoqueLoteController.updateEstoqueLote);
-router.delete('/:id', EstoqueLoteController.deleteEstoqueLote);
+// Rotas básicas CRUD
+router.get('/', EstoqueLoteController.listarEstoque);
+router.get('/:id', EstoqueLoteController.buscarEstoqueLote);
+router.post('/', EstoqueLoteController.criarEstoqueLote);
+router.put('/:id', EstoqueLoteController.atualizarEstoque);
+router.delete('/:id', EstoqueLoteController.excluirEstoqueLote);
 
 // Rotas específicas
-router.get('/remessa/:id', EstoqueLoteController.getEstoqueLotesByRemessa);
-router.get('/modelo-epi/:id', EstoqueLoteController.getEstoqueLotesByModeloEpi);
-router.get('/proximos-vencimento', EstoqueLoteController.getEstoqueLotesProximosVencimento);
-router.get('/baixo-estoque', EstoqueLoteController.getEstoqueLotesBaixoEstoque);
+router.get('/remessa/:id', EstoqueLoteController.listarPorRemessa);
+router.get('/modelo-epi/:id', EstoqueLoteController.listarPorModeloEpi);
+router.get('/relatorios/proximos-vencimento', EstoqueLoteController.listarProximosVencimento);
+router.get('/relatorios/baixo-estoque', EstoqueLoteController.listarBaixoEstoque);
 
 export default router;
