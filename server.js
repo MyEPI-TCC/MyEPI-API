@@ -5,8 +5,6 @@ import dotenv from 'dotenv';
 // Carrega variáveis de ambiente
 dotenv.config();
 
-const PORT = process.env.PORT || 3000;
-
 // Verificar e exibir configurações de ambiente
 console.log('===== AMBIENTE =====');
 console.log(`NODE_ENV: ${process.env.NODE_ENV || 'não definido'}`);
@@ -16,17 +14,23 @@ console.log(`DB_USER: ${process.env.DB_USER || 'não definido'}`);
 console.log(`DB_NAME: ${process.env.DB_NAME || 'não definido'}`);
 console.log('===================');
 
-// Inicia o servidor
-app.listen(PORT, () => {
+// Testa conexão com o banco
+testConnection()
+  .then(connected => {
+    if (connected) {
+      console.log('Banco de dados conectado com sucesso!');
+    } else {
+      console.error('Falha ao conectar ao banco de dados.');
+    }
+  });
+
+// Inicia o servidor apenas em ambiente não-Vercel
+if (process.env.VERCEL !== '1') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
     console.log(`Servidor rodando na porta ${PORT}`);
-    
-    // Testa conexão com o banco ao iniciar
-    testConnection()
-        .then(connected => {
-            if (connected) {
-                console.log('Banco de dados conectado com sucesso!');
-            } else {
-                console.error('Falha ao conectar ao banco de dados.');
-            }
-        });
-});
+  });
+}
+
+// Exportação para Vercel
+export default app;
