@@ -11,6 +11,7 @@ import remessaRouter from './src/routes/remessaRouter.js';
 import movimentacaoRouter from './src/routes/movimentacaoRouter.js';
 import estoqueRouter from './src/routes/estoqueRouter.js';
 import caRouter from './src/routes/caRouter.js';
+import { testConnection } from './src/config/database.js';
 
 class App {
     constructor() {
