@@ -5,15 +5,6 @@ import dotenv from 'dotenv';
 // Carrega variáveis de ambiente
 dotenv.config();
 
-// Verificar e exibir configurações de ambiente
-console.log('===== AMBIENTE =====');
-console.log(`NODE_ENV: ${process.env.NODE_ENV || 'não definido'}`);
-console.log(`DB_HOST: ${process.env.DB_HOST || 'não definido'}`);
-console.log(`DB_PORT: ${process.env.DB_PORT || 'não definido'}`);
-console.log(`DB_USER: ${process.env.DB_USER || 'não definido'}`);
-console.log(`DB_NAME: ${process.env.DB_NAME || 'não definido'}`);
-console.log('===================');
-
 // Testa conexão com o banco
 testConnection()
   .then(connected => {
