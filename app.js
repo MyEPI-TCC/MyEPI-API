@@ -35,7 +35,18 @@ class App {
         this.app.use('/api/remessas', remessaRouter);
         this.app.use('/api/movimentacoes', movimentacaoRouter);
         this.app.use('/api/estoques', estoqueRouter);
-        this.app.use('/api/ca', caRouter); 
+        this.app.use('/api/ca', caRouter);
+
+        this.app.get('/api/health', async (req, res) => {
+            const dbConnected = await testConnection();
+            res.json({ 
+                status: 'OK', 
+                message: 'API funcionando corretamente',
+                database: dbConnected ? 'Conectado' : 'Desconectado',
+                environment: process.env.NODE_ENV || 'development',
+                timestamp: new Date().toISOString()
+            });
+        });
     }
 }
 
