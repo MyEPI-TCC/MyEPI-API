@@ -1,4 +1,5 @@
 import express from 'express';
+import cors from 'cors'; 
 
 import homeRoutes from './src/routes/homeRouter.js';
 import funcionarioRouter from './src/routes/funcionarioRouter.js';
@@ -21,6 +22,7 @@ class App {
     }
 
     middlewares() {
+        this.app.use(cors());
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(express.json());
     }
@@ -40,8 +42,8 @@ class App {
 
         this.app.get('/api/health', async (req, res) => {
             const dbConnected = await testConnection();
-            res.json({ 
-                status: 'OK', 
+            res.json({
+                status: 'OK',
                 message: 'API funcionando corretamente',
                 database: dbConnected ? 'Conectado' : 'Desconectado',
                 environment: process.env.NODE_ENV || 'development',
