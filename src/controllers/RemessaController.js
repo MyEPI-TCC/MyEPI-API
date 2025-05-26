@@ -57,29 +57,40 @@ export const getRemessasByModeloEpi = async (req, res) => {
 // Criar nova remessa
 export const createRemessa = async (req, res) => {
   try {
-    // Validação básica
+    // Validação ajustada
     const {
-      id_remessa, codigo_lote, quantidade, data_entrega,
+      codigo_lote, quantidade, data_entrega,
       validade_lote, nota_fiscal, id_fornecedor, id_modelo_epi, id_ca
+      // observacoes é opcional
     } = req.body;
 
-    if (!id_remessa || !quantidade || !data_entrega || !validade_lote || !nota_fiscal
+    // Adicione codigo_lote à validação
+    if (!codigo_lote || !quantidade || !data_entrega || !validade_lote || !nota_fiscal
       || !id_fornecedor || !id_modelo_epi || !id_ca) {
-      return res.status(400).json({ message: 'Todos os campos obrigatórios devem ser fornecidos' });
+      return res.status(400).json({ success: false, message: 'Todos os campos obrigatórios devem ser fornecidos' });
     }
 
+    // Chama a função create
     const result = await Remessa.create(req.body);
 
-    res.status(201).json({
-      message: 'Remessa cadastrada com sucesso',
-      id: id_remessa,
-      affectedRows: result.affectedRows
-    });
+    // Verifica o resultado da função create
+    if (result.success) {
+      res.status(201).json({
+        success: true,
+        message: result.message,
+        data: result.data // Retorna os IDs criados
+      });
+    } else {
+      // Se Remessa.create retornar um erro controlado
+      res.status(500).json({ success: false, message: result.error || 'Erro interno ao criar remessa' });
+    }
+
   } catch (error) {
-    console.error('Erro ao criar remessa:', error);
-    res.status(500).json({ message: 'Erro ao criar remessa', error: error.message });
+    console.error('Erro no controller ao criar remessa:', error);
+    res.status(500).json({ success: false, message: 'Erro inesperado no servidor ao criar remessa', error: error.message });
   }
 };
+
 
 // Atualizar remessa existente
 export const updateRemessa = async (req, res) => {
