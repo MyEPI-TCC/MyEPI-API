@@ -9,7 +9,7 @@ import marcaRouter from './src/routes/marcaRouter.js';
 import modeloEpiRouter from './src/routes/modeloEpiRouter.js';
 import fornecedorRouter from './src/routes/fornecedorRouter.js';
 import remessaRouter from './src/routes/remessaRouter.js';
-import movimentacaoRouter from './src/routes/movimentacaoRouter.js';
+import entregaRouter from './src/routes/entregasRouter.js';
 import estoqueRouter from './src/routes/estoqueRouter.js';
 import caRouter from './src/routes/caRouter.js';
 import { testConnection } from './src/config/database.js';
@@ -36,7 +36,7 @@ class App {
         this.app.use('/api/modelos-epi', modeloEpiRouter);
         this.app.use('/api/fornecedores', fornecedorRouter);
         this.app.use('/api/remessas', remessaRouter);
-        this.app.use('/api/movimentacoes', movimentacaoRouter);
+        this.app.use('/api/entregas-epi', entregaRouter);
         this.app.use('/api/estoques', estoqueRouter);
         this.app.use('/api/ca', caRouter);
 
