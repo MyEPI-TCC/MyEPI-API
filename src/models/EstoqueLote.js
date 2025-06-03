@@ -19,6 +19,26 @@ class EstoqueLote {
         }
     }
 
+        // NOVO: Buscar estoques por modelo de EPI
+    static async findByModeloEpi(modeloEpiId) {
+        try {
+            const [rows] = await pool.query(
+                `SELECT el.*, r.codigo_lote, r.nota_fiscal, me.nome_epi, f.nome_fornecedor
+                FROM ESTOQUE_LOTE el
+                JOIN REMESSA r ON el.id_remessa = r.id_remessa
+                JOIN MODELO_EPI me ON r.id_modelo_epi = me.id_modelo_epi
+                JOIN FORNECEDOR f ON r.id_fornecedor = f.id_fornecedor
+                WHERE me.id_modelo_epi = ?`,
+                [modeloEpiId]
+            );
+
+            return { success: true, data: rows };
+        } catch (error) {
+            console.error('Erro ao buscar estoques por modelo de EPI:', error);
+            return { success: false, error: error.message };
+        }
+    }
+
     // Buscar um estoque de lote pelo ID
     static async findById(id) {
         try {

@@ -54,6 +54,7 @@ class EntregasController {
       
       if (result.success) {
         return res.status(201).json({ 
+          success: true, 
           message: result.message,
           id: result.id
         });
@@ -127,3 +128,4 @@ class EntregasController {
 }
 
 export default EntregasController;
+

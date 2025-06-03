@@ -15,7 +15,8 @@ router.get('/', (req, res) => {
             modelos_epi: '/api/modelos-epi',
             fornecedores: '/api/fornecedores',
             remessas: '/api/remessas',
-            entregas: '/api/entregas-epi'
+            entregas: '/api/entregas-epi',
+            estoques: '/api/estoques'
         }
     });
 });
