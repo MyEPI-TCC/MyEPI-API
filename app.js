@@ -1,5 +1,7 @@
 import express from 'express';
-import cors from 'cors'; 
+import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 
 import homeRoutes from './src/routes/homeRouter.js';
 import funcionarioRouter from './src/routes/funcionarioRouter.js';
@@ -14,6 +16,10 @@ import estoqueRouter from './src/routes/estoqueRouter.js';
 import caRouter from './src/routes/caRouter.js';
 import { testConnection } from './src/config/database.js';
 
+// Necessário para resolver __dirname com ESModules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 class App {
     constructor() {
         this.app = express();
@@ -25,6 +31,9 @@ class App {
         this.app.use(cors());
         this.app.use(express.urlencoded({ extended: true }));
         this.app.use(express.json());
+
+        // Expor a pasta de uploads publicamente
+        this.app.use('/uploads', express.static(path.resolve(__dirname, 'uploads')));
     }
 
     routes() {
@@ -40,6 +49,7 @@ class App {
         this.app.use('/api/estoques', estoqueRouter);
         this.app.use('/api/ca', caRouter);
 
+        // Endpoint de verificação
         this.app.get('/api/health', async (req, res) => {
             const dbConnected = await testConnection();
             res.json({
@@ -54,4 +64,3 @@ class App {
 }
 
 export default new App().app;
-
