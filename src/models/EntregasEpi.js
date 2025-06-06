@@ -43,7 +43,7 @@ class EntregasEpi {
   }
 
   // Registrar uma nova entrega
-  static async create(entregaData) {
+   static async create(entregaData) {
     const connection = await pool.getConnection();
 
     try {
@@ -60,7 +60,17 @@ class EntregasEpi {
         id_estoque_lote,
       } = entregaData;
 
-      // Verificar estoque disponível
+      // Converte quantidade para inteiro e valida
+      const quantidadeInt = parseInt(quantidade, 10);
+      if (isNaN(quantidadeInt) || quantidadeInt <= 0) {
+        await connection.rollback();
+        return { success: false, error: 'Quantidade inválida' };
+      }
+
+      console.log('Tipo movimentação:', tipo_movimentacao);
+      console.log('Quantidade recebida:', quantidadeInt);
+
+      // 1. Verificar estoque disponível no LOTE
       const [estoqueLoteResult] = await connection.query(
         'SELECT quantidade_estoque FROM ESTOQUE_LOTE WHERE id_estoque_lote = ?',
         [id_estoque_lote]
@@ -71,15 +81,17 @@ class EntregasEpi {
         return { success: false, error: 'Lote de estoque não encontrado' };
       }
 
-      const estoqueAtual = estoqueLoteResult[0].quantidade_estoque;
+      const estoqueAtualLote = estoqueLoteResult[0].quantidade_estoque;
 
-      // Verificar se há estoque suficiente (para entregas)
-      if (tipo_movimentacao === 'Entrega' && estoqueAtual < quantidade) {
+      console.log('Estoque atual do lote:', estoqueAtualLote);
+
+      // Verificar se há estoque suficiente no LOTE (para entregas)
+      if (tipo_movimentacao === 'Entrega' && estoqueAtualLote < quantidadeInt) {
         await connection.rollback();
-        return { success: false, error: 'Quantidade insuficiente em estoque' };
+        return { success: false, error: 'Quantidade insuficiente em estoque no lote' };
       }
 
-      // Inserir a entrega
+      // 2. Inserir a movimentação
       const [result] = await connection.query(
         `INSERT INTO MOVIMENTACAO_ESTOQUE (
           tipo_movimentacao,
@@ -95,7 +107,7 @@ class EntregasEpi {
           tipo_movimentacao,
           data,
           hora,
-          quantidade,
+          quantidadeInt,
           descricao,
           id_funcionario,
           id_modelo_epi,
@@ -103,46 +115,68 @@ class EntregasEpi {
         ]
       );
 
-      // Atualizar o estoque
-      let novaQuantidade;
-
+      // 3. Atualizar a quantidade no ESTOQUE_LOTE
+      let novaQuantidadeLote;
       if (tipo_movimentacao === 'Entrega') {
-        novaQuantidade = estoqueAtual - quantidade;
-      } else if (tipo_movimentacao === 'Devolucao') {
-        novaQuantidade = estoqueAtual + quantidade;
+        novaQuantidadeLote = estoqueAtualLote - quantidadeInt;
+      } else if (tipo_movimentacao === 'Devolucao' || tipo_movimentacao === 'Entrada') { // Adicione 'Entrada' aqui se for um tipo de movimentação de entrada de estoque
+        novaQuantidadeLote = estoqueAtualLote + quantidadeInt;
       } else {
-        novaQuantidade = estoqueAtual; // Outros tipos não afetam o estoque
+        novaQuantidadeLote = estoqueAtualLote; // Troca ou outros tipos não alteram estoque no lote
       }
+
+      console.log('Nova quantidade calculada para o lote:', novaQuantidadeLote);
 
       await connection.query(
         'UPDATE ESTOQUE_LOTE SET quantidade_estoque = ? WHERE id_estoque_lote = ?',
-        [novaQuantidade, id_estoque_lote]
+        [novaQuantidadeLote, id_estoque_lote]
       );
 
-      // Se for rastreável, atualizar o status do EPI (se aplicável)
+      // 4. Atualizar a quantidade total no MODELO_EPI
+      let operador = '';
+      if (tipo_movimentacao === 'Entrega') {
+        operador = '-';
+      } else if (tipo_movimentacao === 'Devolucao' || tipo_movimentacao === 'Entrada') { // Se "Entrada" também afeta o total do modelo
+        operador = '+';
+      } else {
+        // Para "Troca" ou outros tipos que não alteram o estoque total do modelo
+        // Não fazemos nada na tabela MODELO_EPI, ou você pode adicionar uma lógica específica
+        operador = null;
+      }
+
+      if (operador) { // Só atualiza se for uma Entrega, Devolucao ou Entrada
+        await connection.query(
+          `UPDATE MODELO_EPI SET quantidade = quantidade ${operador} ? WHERE id_modelo_epi = ?`,
+          [quantidadeInt, id_modelo_epi]
+        );
+        console.log(`Quantidade do MODELO_EPI atualizada: ${operador}${quantidadeInt} para id ${id_modelo_epi}`);
+      }
+
+      // Se for rastreável, lógica para atualizar status do EPI (se necessário)
       const [epiResult] = await connection.query(
         'SELECT rastreavel FROM MODELO_EPI WHERE id_modelo_epi = ?',
         [id_modelo_epi]
       );
 
       if (epiResult[0]?.rastreavel === 1) {
-        // Implementar lógica para EPIs rastreáveis, se houver
-        // Exemplo: atualizar tabela EPI_RASTREAVEL
+        // Implementar lógica para EPIs rastreáveis, se houver,
+        // por exemplo, atualizar o status de itens individuais em uma tabela de EPIs rastreáveis.
+        // Se essa lógica ainda não existe, pode deixar este bloco vazio ou com um TODO.
       }
 
-      await connection.commit();
+      await connection.commit(); // Confirma todas as operações
 
       return {
         success: true,
-        message: 'Entrega registrada com sucesso',
+        message: 'Movimentação de estoque registrada com sucesso e quantidade do modelo atualizada.',
         id: result.insertId,
       };
     } catch (error) {
-      await connection.rollback();
-      console.error('Erro ao registrar entrega:', error);
+      await connection.rollback(); // Desfaz todas as operações em caso de erro
+      console.error('Erro ao registrar movimentação de estoque:', error);
       return { success: false, error: error.message };
     } finally {
-      connection.release();
+      connection.release(); // Libera a conexão
     }
   }
 
